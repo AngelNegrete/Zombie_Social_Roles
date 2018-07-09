@@ -1,0 +1,8 @@
+[{
+    "grupo":"invitado",
+    "permissions":[{
+            "resources": "/login",
+            "methods":["GET", "POST"],
+            "action": "allow"
+    }]
+}]
