@@ -3,14 +3,44 @@ var Zombie= require("./models/zombie");
 var Equipment = require("./models/equipment");
 var passport=require("passport");
 
+var acl = require("express-acl");
+
 var router= express.Router();
+
+
 
 router.use((req,res,next)=>{
     res.locals.currentZombie=req.zombie;
     res.locals.errors=req.flash("error");
     res.locals.infos=req.flash("info");
+    if(req.zombie)
+    {
+        req.session.rol = req.zombie.rol;
+    }
+
+    if (req.session.rol == undefined){
+        acl.config({
+        baseUrl: '/',
+        defaultRole:'invitado',
+        
+    });
+    }
+
+    else
+    {
+        acl.config({
+            baseUrl: '/',
+            defaultRole:req.session.rol
+        });
+    }
     next();
 });
+//zombie-king {ver y editar todo}
+//zombie-queen {ve todo}
+//zombie-boss {se encarga de la seccion de armas}
+//invitado {salir login y editar su perfil}
+
+router.use(acl.authorize);
 
 router.get("/login", (req, res)=>{
     res.render("login");
@@ -35,6 +65,7 @@ router.get("/signup", (req, res)=>{
 router.post("/signup", (req, res, next)=>{
     var username = req.body.username;
     var password = req.body.password;
+    var rol = req.body.rol;
 
     Zombie.findOne({username: username}, (err, zombie)=>{
         if(err){
@@ -46,7 +77,8 @@ router.post("/signup", (req, res, next)=>{
         }
             var newZombie = new Zombie({
                 username: username,
-                password: password
+                password: password,
+                rol: rol
             });
             newZombie.save(next);
             return res.redirect("/");
@@ -116,10 +148,11 @@ router.get("/edit", ensureAuthenticated, (req, res) => {
 })
 
 router.post("/edit", ensureAuthenticated, (req, res, next) => {
-    req.zombie.displayName = req.displayName;
+    req.zombie.displayName = req.body.displayName;
     req.zombie.bio = req.body.bio;
     req.zombie.save((err) => {
-        next(err); {
+        if (err) {
+            next(err);
             return;
         }
         req.flash("info", "Perfil actualizado!");
@@ -138,4 +171,3 @@ function ensureAuthenticated(req, res, next) {
 
 module.exports=router;
 
-///

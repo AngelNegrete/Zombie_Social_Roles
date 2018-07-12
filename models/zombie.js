@@ -8,7 +8,8 @@ var zombieSchema=mongoose.Schema({
     password:{type: String, required:true},
     createdAt:{type: Date, default: Date.now},
     displayName:{type: String},
-    bio: String
+    bio: String,
+    rol: {type:String, required:true}
 });
 
 var equipmentSchema = mongoose.Schema({
@@ -46,11 +47,14 @@ zombieSchema.methods.checkPassword= function(guess,done){
         done(err,isMatch);
     });
 }
-
+ 
 zombieSchema.methods.name=function(){
     return this.displayName||this.username;
 }
 
+zombieSchema.methods.ROLE=function(){
+    return this.rol||this.rol;
+}
 
 var Zombie=mongoose.model("Zombie",zombieSchema);
 module.exports=Zombie;
